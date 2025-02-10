@@ -1,0 +1,347 @@
+/* 
+  Below are styles for markdown. 
+
+  A couple notes:
+  - because we only want these styles to apply to the rendered markdown
+    on divs that contain markdown, every rule is prefixed by .llm_interface_markdown
+  - the starting point for these styles was the default chrome user-agent sheet
+    https://raw.githubusercontent.com/chromium/chromium/main/third_party/blink/renderer/core/html/resources/html.css
+  - a lot of the rules are stripped out because they are not relevant to the
+    rendered markdown. see the MarkdownScrubber module for a list of the tags we're allowing
+*/
+
+.llm_interface_markdown {
+  display: block;
+}
+
+.llm_interface_markdown p {
+  display: block;
+  line-height: 1.625;
+  padding-bottom: 10px;
+  margin-block-start: 1__qem;
+  margin-block-end: 1__qem;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+.llm_interface_markdown div {
+  display: block
+}
+
+.llm_interface_markdown section {
+  display: block
+}
+
+.llm_interface_markdown blockquote {
+  display: block;
+  margin-block-start: 1__qem;
+  margin-block-end: 1em;
+  margin-inline-start: 40px;
+  margin-inline-end: 40px;
+}
+
+.llm_interface_markdown hr {
+  display: block;
+  overflow: hidden;
+  unicode-bidi: isolate;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
+  border-style: inset;
+  border-width: 1px
+}
+
+/* heading elements */
+
+.llm_interface_markdown h1 {
+  display: block;
+  font-size: 2em;
+  margin-block-start: 0.67__qem;
+  margin-block-end: 0.67em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  font-weight: bold;
+  line-height: 1.0;
+}
+
+.llm_interface_markdown h2 {
+  display: block;
+  font-size: 1.5em;
+  margin-block-start: 0.83__qem;
+  margin-block-end: 0.83em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  font-weight: bold
+}
+
+.llm_interface_markdown h3 {
+  display: block;
+  font-size: 1.17em;
+  margin-block-start: 1__qem;
+  margin-block-end: 1em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  font-weight: bold
+}
+
+.llm_interface_markdown h4 {
+  display: block;
+  margin-block-start: 1.33__qem;
+  margin-block-end: 1.33em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  font-weight: bold
+}
+
+.llm_interface_markdown h5 {
+  display: block;
+  font-size: .83em;
+  margin-block-start: 1.67__qem;
+  margin-block-end: 1.67em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  font-weight: bold
+}
+
+.llm_interface_markdown h6 {
+  display: block;
+  font-size: .67em;
+  margin-block-start: 2.33__qem;
+  margin-block-end: 2.33em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  font-weight: bold
+}
+
+/* tables */
+
+.llm_interface_markdown table {
+  display: table;
+  border-collapse: separate;
+  border-spacing: 2px;
+  border-color: gray;
+  box-sizing: border-box;
+  text-indent: initial
+}
+
+.llm_interface_markdown thead {
+  display: table-header-group;
+  vertical-align: middle;
+  border-color: inherit
+}
+
+.llm_interface_markdown tbody {
+  display: table-row-group;
+  vertical-align: middle;
+  border-color: inherit
+}
+
+.llm_interface_markdown tfoot {
+  display: table-footer-group;
+  vertical-align: middle;
+  border-color: inherit
+}
+
+/* for tables without table section elements (can happen with XHTML or dynamically created tables) */
+.llm_interface_markdown table>tr {
+  vertical-align: middle;
+}
+
+.llm_interface_markdown col {
+  display: table-column
+}
+
+.llm_interface_markdown colgroup {
+  display: table-column-group
+}
+
+.llm_interface_markdown tr {
+  display: table-row;
+  vertical-align: inherit;
+  border-color: inherit
+}
+
+.llm_interface_markdown td, .llm_interface_markdown th {
+  display: table-cell;
+  vertical-align: inherit;
+}
+
+/* When the td/th are inside a table (the normal case), the padding is taken
+care of by HTMLTableCellElement::AdditionalPresentationAttributeStyle(). */
+.llm_interface_markdown td:not(table td),
+.llm_interface_markdown th:not(table th) {
+  padding: 1px;
+}
+
+.llm_interface_markdown th {
+  font-weight: bold;
+  text-align: -internal-center
+}
+
+.llm_interface_markdown caption {
+  display: table-caption;
+  text-align: -webkit-center
+}
+
+/* lists */
+
+.llm_interface_markdown ul {
+  display: block;
+  list-style-type: disc;
+  margin-block-start: 1__qem;
+  margin-block-end: 1em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  padding-inline-start: 40px
+}
+
+.llm_interface_markdown ol {
+  display: block;
+  list-style-type: decimal;
+  margin-block-start: 1__qem;
+  margin-block-end: 1em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  padding-inline-start: 40px
+}
+
+.llm_interface_markdown li {
+  display: list-item;
+  text-align: -webkit-match-parent;
+}
+
+.llm_interface_markdown ul ul, .llm_interface_markdown ol ul {
+  list-style-type: circle
+}
+
+.llm_interface_markdown ol ol ul, .llm_interface_markdown ol ul ul, .llm_interface_markdown ul ol ul, .llm_interface_markdown ul ul ul {
+  list-style-type: square
+}
+
+.llm_interface_markdown dd {
+  display: block;
+  margin-inline-start: 40px
+}
+
+.llm_interface_markdown dl {
+  display: block;
+  margin-block-start: 1__qem;
+  margin-block-end: 1em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+.llm_interface_markdown dt {
+  display: block
+}
+
+.llm_interface_markdown ol ul, .llm_interface_markdown ul ol, .llm_interface_markdown ul ul, .llm_interface_markdown ol ol {
+  margin-block-start: 0;
+  margin-block-end: 0
+}
+
+/* inline elements */
+
+.llm_interface_markdown u {
+  text-decoration: underline
+}
+
+.llm_interface_markdown strong, .llm_interface_markdown b {
+  font-weight: bold
+}
+
+.llm_interface_markdown i, .llm_interface_markdown em {
+  font-style: italic
+}
+
+.llm_interface_markdown code {
+  font-family: monospace
+}
+
+.llm_interface_markdown pre {
+  background: #171717;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  display: block;
+  font-family: monospace;
+  overflow-x: auto;
+  margin: 1rem 0 2rem;
+  padding: 2rem;  
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+.llm_interface_markdown sm {
+  font-size: smaller
+}
+
+.llm_interface_markdown del {
+  text-decoration: line-through
+}
+
+.llm_interface_markdown sub {
+  vertical-align: sub;
+  font-size: smaller
+}
+
+.llm_interface_markdown sup {
+  vertical-align: super;
+  font-size: smaller
+}
+
+.llm_interface_markdown a:-webkit-any-link {
+  color: -webkit-link;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.llm_interface_markdown a:-webkit-any-link:active {
+  color: -webkit-activelink
+}
+
+.llm_interface_markdown a:-webkit-any-link:read-write {
+  cursor: text;
+}
+
+.llm_interface_markdown a:-webkit-any-link:focus-visible {
+  outline-offset: 1px;
+}
+
+.llm_interface_markdown details {
+  display: block
+}
+
+.llm_interface_markdown summary {
+  display: block
+}
+
+/*
+* https://html.spec.whatwg.org/C/#the-details-and-summary-elements
+* The specification doesn't have |details >| and |:first-of-type|.
+* We add them because:
+*   - We had provided |summary { display: block }| for a long time,
+*     there are sites using <summary> without details, and they
+*     expect that <summary> is not a list-item.
+*   - Firefox does so.
+*/
+.llm_interface_markdown details>summary:first-of-type {
+  display: list-item;
+  counter-increment: list-item 0;
+  list-style: disclosure-closed inside;
+}
+
+.llm_interface_markdown details[open]>summary:first-of-type {
+  list-style-type: disclosure-open;
+}
+
+/* Allows thead sections to print at the top of each page. */
+@media print {
+  .llm_interface_markdown thead {
+    break-inside: avoid;
+  }
+
+  .llm_interface_markdown tfoot {
+    break-inside: avoid;
+  }
+}
