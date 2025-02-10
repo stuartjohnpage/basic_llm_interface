@@ -45,8 +45,10 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
         [%{role: :assistant, content: content} | messages] ->
           if String.contains?(chunk, "</think>") do
             # Convert think blocks to italics
-            new_content = (content <> chunk)
+            new_content =
+              (content <> chunk)
               |> String.replace(~r/<think>(.*?)<\/think>/s, "*\\1*")
+
             [%{role: :assistant, content: new_content} | messages]
           else
             [%{role: :assistant, content: content <> chunk} | messages]
