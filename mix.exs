@@ -60,7 +60,8 @@ defmodule LlmInterface.MixProject do
       {:bandit, "~> 1.5"},
       {:req, "~> 0.5.0"},
       {:earmark, "~> 1.4"},
-      {:html_sanitize_ex, "~> 1.4"}
+      {:html_sanitize_ex, "~> 1.4"},
+      {:hermes_mcp, "~> 0.3"}
     ]
   end
 

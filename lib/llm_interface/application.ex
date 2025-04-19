@@ -7,6 +7,9 @@ defmodule LlmInterface.Application do
 
   @impl true
   def start(_type, _args) do
+    mcp_client_name = LlmInterface.HexDocsMCPClient
+    google_maps_client_name = LlmInterface.GoogleMapsMCPClient
+
     children = [
       LlmInterfaceWeb.Telemetry,
       LlmInterface.Repo,
@@ -17,7 +20,13 @@ defmodule LlmInterface.Application do
       # Start a worker by calling: LlmInterface.Worker.start_link(arg)
       # {LlmInterface.Worker, arg},
       # Start to serve requests, typically the last entry
-      LlmInterfaceWeb.Endpoint
+      LlmInterfaceWeb.Endpoint,
+      # MCP Supervisor - ensures all MCP clients start before tools registry
+      {LlmInterface.MCPSupervisor,
+       [
+         mcp_client_name: mcp_client_name,
+         google_maps_client_name: google_maps_client_name
+       ]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
