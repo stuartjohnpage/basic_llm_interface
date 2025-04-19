@@ -40,7 +40,7 @@ defmodule LlmInterface.MCPSupervisor do
            command: "npx",
            args: ["-y", "@modelcontextprotocol/server-google-maps"],
            env: %{
-             "GOOGLE_MAPS_API_KEY" => "google_maps_api_key_here"
+             "GOOGLE_MAPS_API_KEY" => System.get_env("GOOGLE_MAPS_API_KEY")
            }
          ]},
         id: :google_maps_mcp_transport
