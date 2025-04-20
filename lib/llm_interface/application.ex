@@ -7,8 +7,9 @@ defmodule LlmInterface.Application do
 
   @impl true
   def start(_type, _args) do
-    mcp_client_name = LlmInterface.HexDocsMCPClient
+    hexdocs_mcp_client_name = LlmInterface.HexDocsMCPClient
     google_maps_client_name = LlmInterface.GoogleMapsMCPClient
+    # test_client_name = LlmInterface.TestMCPClient
 
     children = [
       LlmInterfaceWeb.Telemetry,
@@ -24,8 +25,9 @@ defmodule LlmInterface.Application do
       # MCP Supervisor - ensures all MCP clients start before tools registry
       {LlmInterface.MCPSupervisor,
        [
-         mcp_client_name: mcp_client_name,
-         google_maps_client_name: google_maps_client_name
+         hexdocs_mcp_client_name: hexdocs_mcp_client_name,
+         google_maps_client_name: google_maps_client_name,
+        #  test_client_name: test_client_name
        ]}
     ]
 

@@ -1,4 +1,4 @@
-defmodule LlmInterface.McpTools do
+defmodule LlmInterface.MCPTools do
   @moduledoc """
   Module for handling MCP tool interactions with the language model.
   Maintains a registry of available tools from all MCP clients.
@@ -8,6 +8,7 @@ defmodule LlmInterface.McpTools do
 
   @hexdocs_client LlmInterface.HexDocsMCPClient
   @google_maps_client LlmInterface.GoogleMapsMCPClient
+  # @test_client LlmInterface.TestMCPClient
 
   # Maximum number of retries for client readiness
   @max_retries 5
@@ -132,7 +133,8 @@ defmodule LlmInterface.McpTools do
     # Define the clients and their prefixes
     clients = [
       {"mcp_hexdocs", @hexdocs_client},
-      {"mcp_google_maps", @google_maps_client}
+      {"mcp_google_maps", @google_maps_client},
+      # {"mcp_test", @test_client}
     ]
 
     # Collect tools from each client

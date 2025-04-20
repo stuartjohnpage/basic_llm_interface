@@ -2,7 +2,7 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
   use LlmInterfaceWeb, :live_view
 
   alias LlmInterfaceWeb.Unsafe
-  alias LlmInterface.McpTools
+  alias LlmInterface.MCPTools
 
   @impl true
   def mount(_params, _session, socket) do
@@ -20,7 +20,7 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
     # Use string keys for message structure
     message = %{"role" => "user", "content" => content}
     updated_messages = [message | socket.assigns.messages]
-    McpTools.refresh_tools()
+    MCPTools.refresh_tools()
 
     # The process id of the current LiveView
     pid = self()
@@ -60,10 +60,10 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
   @impl true
   def handle_info({:tool_call, tool_call}, socket) do
     # Execute the tool call
-    result = McpTools.execute_tool_call(tool_call)
+    result = MCPTools.execute_tool_call(tool_call)
 
     # Format the content appropriately based on the result type
-    content = McpTools.format_tool_result(result)
+    content = MCPTools.format_tool_result(result)
 
     # Create a tool response message using the proper format with string keys
     tool_result_message = %{
@@ -123,10 +123,10 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
     tool_call = List.first(tool_calls)
 
     # Initialize or update the current tool call
-    updated_tool_call = McpTools.build_tool_call(current_tool_call, tool_call)
+    updated_tool_call = MCPTools.build_tool_call(current_tool_call, tool_call)
 
     # Create an assistant message with the tool call info if none exists
-    updated_messages = McpTools.create_tool_call_message(messages, updated_tool_call)
+    updated_messages = MCPTools.create_tool_call_message(messages, updated_tool_call)
 
     # Store the current tool call
     socket |> assign(:current_tool_call, updated_tool_call) |> assign(:messages, updated_messages)
@@ -231,7 +231,7 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
   end
 
   defp run_chat_completion(pid, messages) do
-    request = %{temperature: 1, messages: messages, tools: McpTools.get_available_tools()}
+    request = %{temperature: 1, messages: messages, tools: MCPTools.get_available_tools()}
     IO.inspect(request, label: "Request")
 
     # Use the new chat_completion_stream function with correct parameter format
