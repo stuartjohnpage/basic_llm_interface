@@ -48,7 +48,7 @@ defmodule LlmInterface.MCPSupervisor do
              "mcp/google-maps"
            ],
            env: %{
-             "GOOGLE_MAPS_API_KEY" => System.get_env("GOOGLE_MAPS_API_KEY")
+             "GOOGLE_MAPS_API_KEY" => Application.get_env(:llm_interface, :google_maps_api_key)
            },
            capabilities: %{"roots" => %{"listChanged" => true}, "sampling" => %{}}
          ]},
@@ -69,7 +69,7 @@ defmodule LlmInterface.MCPSupervisor do
              "mcp/brave-search"
            ],
            env: %{
-             "BRAVE_API_KEY" => System.get_env("BRAVE_API_KEY")
+             "BRAVE_API_KEY" => Application.get_env(:llm_interface, :brave_api_key)
            },
            capabilities: %{"roots" => %{"listChanged" => true}, "sampling" => %{}}
          ]},
