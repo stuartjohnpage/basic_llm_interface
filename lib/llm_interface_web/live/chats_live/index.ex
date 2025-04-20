@@ -38,6 +38,27 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
   end
 
   @impl true
+  def handle_event("stop", _, socket) do
+    # Cancel the async task
+    socket = cancel_async(socket, :chat_completion)
+
+    # Update the message to indicate it was stopped
+    updated_messages =
+      case socket.assigns.messages do
+        [%{"role" => "assistant", "content" => content} | rest] ->
+          [%{"role" => "assistant", "content" => content <> "\n\n*Stopped by user*"} | rest]
+
+        messages ->
+          messages
+      end
+
+    {:noreply,
+     socket
+     |> assign(:running, false)
+     |> assign(:messages, updated_messages)}
+  end
+
+  @impl true
   def handle_async(:chat_completion, _result, socket) do
     {:noreply, assign(socket, :running, false)}
   end

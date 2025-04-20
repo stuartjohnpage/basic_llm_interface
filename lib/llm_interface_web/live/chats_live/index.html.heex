@@ -81,7 +81,19 @@
         rows={4}
       ></textarea>
 
-      <div class="flex justify-end">
+      <div class="flex justify-end space-x-2">
+        <%= if @running do %>
+          <button
+            type="button"
+            phx-click="stop"
+            class="flex items-center justify-center
+                   px-3 py-1.5 rounded
+                   bg-red-200 hover:bg-red-300
+                   transition"
+          >
+            Stop
+          </button>
+        <% end %>
         <button
           type="submit"
           disabled={@running}
