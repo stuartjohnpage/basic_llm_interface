@@ -132,80 +132,66 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
     socket |> assign(:current_tool_call, updated_tool_call) |> assign(:messages, updated_messages)
   end
 
-  defp finalize_tool_call(socket) do
-    # Execute the tool call when we receive the finish message
-    case socket.assigns.current_tool_call do
-      nil ->
-        socket
+  defp finalize_tool_call(socket = %{assigns: %{current_tool_call: nil}}), do: socket
 
-      tool_call ->
-        # Try to parse the arguments as JSON
-        arguments =
-          try do
-            # Parse the JSON arguments
-            args = Jason.decode!(tool_call["arguments"])
+  defp finalize_tool_call(socket = %{assigns: %{current_tool_call: tool_call}}) do
+    arguments = parse_tool_arguments(tool_call)
+    arguments_json = Jason.encode!(arguments)
 
-            # Convert known numeric fields to integers or floats
-            args =
-              if tool_call["name"] == "mcp_hexdocs_mcp_search" && Map.has_key?(args, "limit") do
-                case args["limit"] do
-                  limit when is_binary(limit) ->
-                    # Convert string to integer for limit
-                    {num, _} = Integer.parse(limit)
-                    Map.put(args, "limit", num)
+    complete_tool_call = %{
+      "id" => tool_call["id"],
+      "type" => "function",
+      "function" => %{
+        "name" => tool_call["name"],
+        "arguments" => arguments_json
+      }
+    }
 
-                  _ ->
-                    # Already a number or nil
-                    args
-                end
-              else
-                args
-              end
+    updated_socket = update_assistant_message(socket, complete_tool_call)
 
-            args
-          rescue
-            _e ->
-              %{}
-          end
+    tool_for_execution = %{
+      "id" => tool_call["id"],
+      "name" => tool_call["name"],
+      "arguments" => arguments
+    }
 
-        # Format arguments back to a JSON string
-        arguments_json = Jason.encode!(arguments)
+    send(self(), {:tool_call, tool_for_execution})
+    assign(updated_socket, :current_tool_call, nil)
+  end
 
-        # Create the complete tool call with the correct format
-        complete_tool_call = %{
-          "id" => tool_call["id"],
-          "type" => "function",
-          "function" => %{
-            "name" => tool_call["name"],
-            "arguments" => arguments_json
-          }
-        }
-
-        # Update the assistant message with the complete tool call
-        updated_socket =
-          case socket.assigns.messages do
-            [%{"role" => "assistant"} = assistant_message | rest] ->
-              updated_message =
-                Map.put(assistant_message, "tool_calls", [complete_tool_call])
-
-              assign(socket, :messages, [updated_message | rest])
-
-            _ ->
-              socket
-          end
-
-        # Send the tool call to be executed with the already parsed arguments
-        tool_for_execution = %{
-          "id" => tool_call["id"],
-          "name" => tool_call["name"],
-          "arguments" => arguments
-        }
-
-        send(self(), {:tool_call, tool_for_execution})
-
-        # Clear the current tool call
-        assign(updated_socket, :current_tool_call, nil)
+  defp parse_tool_arguments(tool_call) do
+    try do
+      args = Jason.decode!(tool_call["arguments"])
+      maybe_convert_numeric_limit(args, tool_call["name"])
+    rescue
+      _e -> %{}
     end
+  end
+
+  defp maybe_convert_numeric_limit(args, "mcp_hexdocs_mcp_search")
+       when is_map_key(args, "limit") do
+    case args["limit"] do
+      limit when is_binary(limit) ->
+        {num, _} = Integer.parse(limit)
+        Map.put(args, "limit", num)
+
+      _ ->
+        args
+    end
+  end
+
+  defp maybe_convert_numeric_limit(args, _), do: args
+
+  defp update_assistant_message(
+         socket = %{assigns: %{messages: [%{"role" => "assistant"} = assistant_message | rest]}},
+         complete_tool_call
+       ) do
+    updated_message = Map.put(assistant_message, "tool_calls", [complete_tool_call])
+    assign(socket, :messages, [updated_message | rest])
+  end
+
+  defp update_assistant_message(socket, _complete_tool_call) do
+    socket
   end
 
   defp update_message_content(socket, content) do
