@@ -9,7 +9,7 @@ defmodule LlmInterface.Application do
   def start(_type, _args) do
     hexdocs_mcp_client_name = LlmInterface.HexDocsMCPClient
     google_maps_client_name = LlmInterface.GoogleMapsMCPClient
-    # test_client_name = LlmInterface.TestMCPClient
+    brave_browser_client_name = LlmInterface.BraveBrowserMCPClient
 
     children = [
       LlmInterfaceWeb.Telemetry,
@@ -27,7 +27,7 @@ defmodule LlmInterface.Application do
        [
          hexdocs_mcp_client_name: hexdocs_mcp_client_name,
          google_maps_client_name: google_maps_client_name,
-        #  test_client_name: test_client_name
+         brave_browser_client_name: brave_browser_client_name
        ]}
     ]
 

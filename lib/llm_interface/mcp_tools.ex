@@ -8,6 +8,7 @@ defmodule LlmInterface.MCPTools do
 
   @hexdocs_client LlmInterface.HexDocsMCPClient
   @google_maps_client LlmInterface.GoogleMapsMCPClient
+  @brave_browser_client LlmInterface.BraveBrowserMCPClient
   # @test_client LlmInterface.TestMCPClient
 
   # Maximum number of retries for client readiness
@@ -53,7 +54,6 @@ defmodule LlmInterface.MCPTools do
   """
   def get_available_tools do
     GenServer.call(__MODULE__, :get_available_tools)
-    |> IO.inspect(label: "Available tools")
   end
 
   @doc """
@@ -134,7 +134,7 @@ defmodule LlmInterface.MCPTools do
     clients = [
       {"mcp_hexdocs", @hexdocs_client},
       {"mcp_google_maps", @google_maps_client},
-      # {"mcp_test", @test_client}
+      {"mcp_brave_browser", @brave_browser_client}
     ]
 
     # Collect tools from each client

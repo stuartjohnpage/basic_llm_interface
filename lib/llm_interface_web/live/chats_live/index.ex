@@ -232,7 +232,6 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
 
   defp run_chat_completion(pid, messages) do
     request = %{temperature: 1, messages: messages, tools: MCPTools.get_available_tools()}
-    IO.inspect(request, label: "Request")
 
     # Use the new chat_completion_stream function with correct parameter format
     case LlmInterface.LanguageModel.chat_completion_stream(

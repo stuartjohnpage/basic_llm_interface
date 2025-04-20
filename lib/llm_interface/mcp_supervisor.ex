@@ -19,7 +19,7 @@ defmodule LlmInterface.MCPSupervisor do
   def init(opts) do
     hexdocs_mcp_client_name = Keyword.fetch!(opts, :hexdocs_mcp_client_name)
     google_maps_client_name = Keyword.fetch!(opts, :google_maps_client_name)
-    # test_client_name = Keyword.fetch!(opts, :test_client_name)
+    brave_browser_client_name = Keyword.fetch!(opts, :brave_browser_client_name)
 
     children = [
       # Group 1: Transports
@@ -38,8 +38,15 @@ defmodule LlmInterface.MCPSupervisor do
          [
            name: LlmInterfaceWeb.GoogleMapsMCPTransport,
            client: google_maps_client_name,
-           command: "npx",
-           args: ["-y", "@modelcontextprotocol/server-google-maps"],
+           command: "docker",
+           args: [
+             "run",
+             "-i",
+             "--rm",
+             "-e",
+             "GOOGLE_MAPS_API_KEY",
+             "mcp/google-maps"
+           ],
            env: %{
              "GOOGLE_MAPS_API_KEY" => System.get_env("GOOGLE_MAPS_API_KEY")
            },
@@ -47,16 +54,27 @@ defmodule LlmInterface.MCPSupervisor do
          ]},
         id: :google_maps_mcp_transport
       ),
-      # Supervisor.child_spec(
-      #   {Hermes.Transport.STDIO,
-      #    [
-      #      name: LlmInterfaceWeb.TestMCPTransport,
-      #      client: test_client_name,
-      #      command: "npx",
-      #      args: ["-y", "@modelcontextprotocol/server-everything"]
-      #    ]},
-      #   id: :test_mcp_transport
-      # ),
+      Supervisor.child_spec(
+        {Hermes.Transport.STDIO,
+         [
+           name: LlmInterfaceWeb.BraveBrowserMCPTransport,
+           client: brave_browser_client_name,
+           command: "docker",
+           args: [
+             "run",
+             "-i",
+             "--rm",
+             "-e",
+             "BRAVE_API_KEY",
+             "mcp/brave-search"
+           ],
+           env: %{
+             "BRAVE_API_KEY" => System.get_env("BRAVE_API_KEY")
+           },
+           capabilities: %{"roots" => %{"listChanged" => true}, "sampling" => %{}}
+         ]},
+        id: :brave_browser_mcp_transport
+      ),
 
       # Group 2: Clients - start after transports
       Supervisor.child_spec(
@@ -79,6 +97,7 @@ defmodule LlmInterface.MCPSupervisor do
              layer: Hermes.Transport.STDIO,
              name: LlmInterfaceWeb.GoogleMapsMCPTransport
            ],
+           request_timeout: 60_000,
            client_info: %{
              "name" => "LlmInterfaceWeb",
              "version" => "1.0.0"
@@ -86,18 +105,21 @@ defmodule LlmInterface.MCPSupervisor do
          ]},
         id: :google_maps_mcp_client
       ),
-      # Supervisor.child_spec(
-      #   {Hermes.Client,
-      #    [
-      #      name: test_client_name,
-      #      transport: [layer: Hermes.Transport.STDIO, name: LlmInterfaceWeb.TestMCPTransport],
-      #      client_info: %{
-      #        "name" => "LlmInterfaceWeb",
-      #        "version" => "1.0.0"
-      #      }
-      #    ]},
-      #   id: :test_mcp_client
-      # ),
+      Supervisor.child_spec(
+        {Hermes.Client,
+         [
+           name: brave_browser_client_name,
+           transport: [
+             layer: Hermes.Transport.STDIO,
+             name: LlmInterfaceWeb.BraveBrowserMCPTransport
+           ],
+           client_info: %{
+             "name" => "LlmInterfaceWeb",
+             "version" => "1.0.0"
+           }
+         ]},
+        id: :brave_browser_mcp_client
+      ),
 
       # Group 3: Tools Registry - starts after all clients are ready
       {LlmInterface.MCPTools, []}
