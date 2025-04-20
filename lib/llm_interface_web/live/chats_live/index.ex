@@ -132,9 +132,9 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
     socket |> assign(:current_tool_call, updated_tool_call) |> assign(:messages, updated_messages)
   end
 
-  defp finalize_tool_call(socket = %{assigns: %{current_tool_call: nil}}), do: socket
+  defp finalize_tool_call(%{assigns: %{current_tool_call: nil}} = socket), do: socket
 
-  defp finalize_tool_call(socket = %{assigns: %{current_tool_call: tool_call}}) do
+  defp finalize_tool_call(%{assigns: %{current_tool_call: tool_call}} = socket) do
     arguments = parse_tool_arguments(tool_call)
     arguments_json = Jason.encode!(arguments)
 
@@ -183,7 +183,7 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
   defp maybe_convert_numeric_limit(args, _), do: args
 
   defp update_assistant_message(
-         socket = %{assigns: %{messages: [%{"role" => "assistant"} = assistant_message | rest]}},
+         %{assigns: %{messages: [%{"role" => "assistant"} = assistant_message | rest]}} = socket,
          complete_tool_call
        ) do
     updated_message = Map.put(assistant_message, "tool_calls", [complete_tool_call])

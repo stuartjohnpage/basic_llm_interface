@@ -271,14 +271,12 @@ defmodule LlmInterface.MCPTools do
   Format a tool result for display and JSON encoding.
   """
   def format_tool_result(%{"content" => content}) do
-    content
-    |> Enum.map(fn item ->
+    Enum.map_join(content, "", fn item ->
       case item do
         %{"type" => "text", "text" => text} -> text
         _ -> ""
       end
     end)
-    |> Enum.join()
   end
 
   def format_tool_result(result) do
