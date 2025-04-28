@@ -6,11 +6,6 @@ defmodule LlmInterface.MCPTools do
   use GenServer
   require Logger
 
-  @hexdocs_client LlmInterface.HexDocsMCPClient
-  @google_maps_client LlmInterface.GoogleMapsMCPClient
-  @brave_browser_client LlmInterface.BraveBrowserMCPClient
-  # @test_client LlmInterface.TestMCPClient
-
   # Maximum number of retries for client readiness
   @max_retries 5
   # Delay between retries in milliseconds
@@ -66,10 +61,11 @@ defmodule LlmInterface.MCPTools do
   # Server Callbacks
 
   @impl true
-  def init(_opts) do
-    # Initialize with empty state and then immediately refresh
+  def init(opts) do
     Process.send_after(self(), {:refresh_tools, 0}, 0)
-    {:ok, %{tools: [], tool_map: %{}}}
+    clients = Keyword.get(opts, :clients, [])
+
+    {:ok, %{tools: [], tool_map: %{}, clients: clients}}
   end
 
   @impl true
@@ -86,18 +82,22 @@ defmodule LlmInterface.MCPTools do
   end
 
   @impl true
-  def handle_call(:refresh_tools, _from, _state) do
-    {tools, tool_map} = discover_tools()
-    {:reply, :ok, %{tools: tools, tool_map: tool_map}}
+  def handle_call(:refresh_tools, _from, state) do
+    clients = Map.get(state, :clients)
+
+    {tools, tool_map} = discover_tools(clients)
+    {:reply, :ok, %{tools: tools, tool_map: tool_map, clients: clients}}
   end
 
   @impl true
   def handle_info({:refresh_tools, retry_count}, state) when retry_count < @max_retries do
+    clients = Map.get(state, :clients)
+
     # Try to discover tools with retry logic
-    case safe_discover_tools() do
-      {:ok, tools, tool_map} ->
+    case safe_discover_tools(clients) do
+      {:ok, tools, tool_map, clients} ->
         Logger.info("Successfully discovered MCP tools on attempt #{retry_count + 1}")
-        {:noreply, %{tools: tools, tool_map: tool_map}}
+        {:noreply, %{tools: tools, tool_map: tool_map, clients: clients}}
 
       {:error, reason} ->
         # Clients may not be ready yet, schedule another retry
@@ -118,10 +118,10 @@ defmodule LlmInterface.MCPTools do
 
   # Private functions
 
-  defp safe_discover_tools do
+  defp safe_discover_tools(clients) do
     try do
-      {tools, tool_map} = discover_tools()
-      {:ok, tools, tool_map}
+      {tools, tool_map} = discover_tools(clients)
+      {:ok, tools, tool_map, clients}
     rescue
       e -> {:error, e}
     catch
@@ -129,14 +129,7 @@ defmodule LlmInterface.MCPTools do
     end
   end
 
-  defp discover_tools do
-    # Define the clients and their prefixes
-    clients = [
-      {"mcp_hexdocs", @hexdocs_client},
-      {"mcp_google_maps", @google_maps_client},
-      {"mcp_brave_browser", @brave_browser_client}
-    ]
-
+  defp discover_tools(clients) do
     # Collect tools from each client
     {all_tools, tool_mappings} =
       Enum.reduce(clients, {[], %{}}, fn {prefix, client}, {tools_acc, map_acc} ->

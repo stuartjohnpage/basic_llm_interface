@@ -15,19 +15,33 @@ defmodule LlmInterface.MCPSupervisor do
     Supervisor.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  @impl true
-  def init(opts) do
-    hexdocs_mcp_client_name = Keyword.fetch!(opts, :hexdocs_mcp_client_name)
-    google_maps_client_name = Keyword.fetch!(opts, :google_maps_client_name)
-    brave_browser_client_name = Keyword.fetch!(opts, :brave_browser_client_name)
+  @hex_docs_mcp %{
+    hexdocs_mcp_client_name: LlmInterface.HexDocsMCPClient,
+    hexdocs_mcp_transport_name: LlmInterfaceWeb.HexDocsMCPTransport,
+    hexdocs_mcp_prefix: "mcp_hexdocs"
+  }
 
+  @google_maps_mcp %{
+    google_maps_mcp_client_name: LlmInterface.GoogleMapsMCPClient,
+    google_maps_mcp_transport_name: LlmInterfaceWeb.GoogleMapsMCPTransport,
+    google_maps_mcp_prefix: "mcp_google_maps"
+  }
+
+  @brave_browser_mcp %{
+    brave_browser_mcp_client_name: LlmInterface.BraveBrowserMCPClient,
+    brave_browser_mcp_transport_name: LlmInterfaceWeb.BraveBrowserMCPTransport,
+    brave_browser_mcp_prefix: "mcp_brave_browser"
+  }
+
+  @impl true
+  def init(_opts) do
     children = [
       # Group 1: Transports
       Supervisor.child_spec(
         {Hermes.Transport.STDIO,
          [
-           name: LlmInterfaceWeb.HexDocsMCPTransport,
-           client: hexdocs_mcp_client_name,
+           name: @hex_docs_mcp.hexdocs_mcp_transport_name,
+           client: @hex_docs_mcp.hexdocs_mcp_client_name,
            command: "npx",
            args: ["-y", "hexdocs-mcp@0.2.0"]
          ]},
@@ -36,8 +50,8 @@ defmodule LlmInterface.MCPSupervisor do
       Supervisor.child_spec(
         {Hermes.Transport.STDIO,
          [
-           name: LlmInterfaceWeb.GoogleMapsMCPTransport,
-           client: google_maps_client_name,
+           name: @google_maps_mcp.google_maps_mcp_transport_name,
+           client: @google_maps_mcp.google_maps_mcp_client_name,
            command: "docker",
            args: [
              "run",
@@ -57,8 +71,8 @@ defmodule LlmInterface.MCPSupervisor do
       Supervisor.child_spec(
         {Hermes.Transport.STDIO,
          [
-           name: LlmInterfaceWeb.BraveBrowserMCPTransport,
-           client: brave_browser_client_name,
+           name: @brave_browser_mcp.brave_browser_mcp_transport_name,
+           client: @brave_browser_mcp.brave_browser_mcp_client_name,
            command: "docker",
            args: [
              "run",
@@ -80,8 +94,11 @@ defmodule LlmInterface.MCPSupervisor do
       Supervisor.child_spec(
         {Hermes.Client,
          [
-           name: hexdocs_mcp_client_name,
-           transport: [layer: Hermes.Transport.STDIO, name: LlmInterfaceWeb.HexDocsMCPTransport],
+           name: @hex_docs_mcp.hexdocs_mcp_client_name,
+           transport: [
+             layer: Hermes.Transport.STDIO,
+             name: @hex_docs_mcp.hexdocs_mcp_transport_name
+           ],
            client_info: %{
              "name" => "LlmInterfaceWeb",
              "version" => "1.0.0"
@@ -92,10 +109,10 @@ defmodule LlmInterface.MCPSupervisor do
       Supervisor.child_spec(
         {Hermes.Client,
          [
-           name: google_maps_client_name,
+           name: @google_maps_mcp.google_maps_mcp_client_name,
            transport: [
              layer: Hermes.Transport.STDIO,
-             name: LlmInterfaceWeb.GoogleMapsMCPTransport
+             name: @google_maps_mcp.google_maps_mcp_transport_name
            ],
            request_timeout: 60_000,
            client_info: %{
@@ -108,10 +125,10 @@ defmodule LlmInterface.MCPSupervisor do
       Supervisor.child_spec(
         {Hermes.Client,
          [
-           name: brave_browser_client_name,
+           name: @brave_browser_mcp.brave_browser_mcp_client_name,
            transport: [
              layer: Hermes.Transport.STDIO,
-             name: LlmInterfaceWeb.BraveBrowserMCPTransport
+             name: @brave_browser_mcp.brave_browser_mcp_transport_name
            ],
            client_info: %{
              "name" => "LlmInterfaceWeb",
@@ -122,7 +139,16 @@ defmodule LlmInterface.MCPSupervisor do
       ),
 
       # Group 3: Tools Registry - starts after all clients are ready
-      {LlmInterface.MCPTools, []}
+      {LlmInterface.MCPTools,
+       [
+         clients: [
+           {@hex_docs_mcp.hexdocs_mcp_prefix, @hex_docs_mcp.hexdocs_mcp_client_name},
+           {@google_maps_mcp.google_maps_mcp_prefix,
+            @google_maps_mcp.google_maps_mcp_client_name},
+           {@brave_browser_mcp.brave_browser_mcp_prefix,
+            @brave_browser_mcp.brave_browser_mcp_client_name}
+         ]
+       ]}
     ]
 
     # Use rest_for_one strategy - if a process fails, all processes started after it are restarted

@@ -7,10 +7,6 @@ defmodule LlmInterface.Application do
 
   @impl true
   def start(_type, _args) do
-    hexdocs_mcp_client_name = LlmInterface.HexDocsMCPClient
-    google_maps_client_name = LlmInterface.GoogleMapsMCPClient
-    brave_browser_client_name = LlmInterface.BraveBrowserMCPClient
-
     children = [
       LlmInterfaceWeb.Telemetry,
       LlmInterface.Repo,
@@ -23,12 +19,7 @@ defmodule LlmInterface.Application do
       # Start to serve requests, typically the last entry
       LlmInterfaceWeb.Endpoint,
       # MCP Supervisor - ensures all MCP clients start before tools registry
-      {LlmInterface.MCPSupervisor,
-       [
-         hexdocs_mcp_client_name: hexdocs_mcp_client_name,
-         google_maps_client_name: google_maps_client_name,
-         brave_browser_client_name: brave_browser_client_name
-       ]}
+      {LlmInterface.MCPSupervisor, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
