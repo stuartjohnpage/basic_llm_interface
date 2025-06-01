@@ -121,11 +121,15 @@ defmodule LlmInterfaceWeb.ChatsLive.Index do
       %{"choices" => [%{"delta" => %{"tool_calls" => tool_calls}}]} ->
         process_tool_calls(socket, tool_calls)
 
-      # Finish message for tool call
-      %{"choices" => [%{"delta" => %{}, "finish_reason" => "stop"}]} ->
+      # Tool calls completion - when LLM finishes building tool calls
+      %{"choices" => [%{"delta" => %{}, "finish_reason" => "tool_calls"}]} ->
         finalize_tool_call(socket)
 
-      # Ignore other types of chunks
+      # Regular completion - when LLM finishes generating text
+      %{"choices" => [%{"delta" => %{}, "finish_reason" => "stop"}]} ->
+        socket
+
+      # Ignore other chunk types
       _ ->
         socket
     end

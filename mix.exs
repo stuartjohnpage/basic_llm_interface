@@ -61,7 +61,7 @@ defmodule LlmInterface.MixProject do
       {:req, "~> 0.5.0"},
       {:earmark, "~> 1.4"},
       {:html_sanitize_ex, "~> 1.4"},
-      {:hermes_mcp, "~> 0.3"},
+      {:hermes_mcp, "~> 0.4.1"},
       {:credo, "~> 1.7.10", only: [:dev, :test]}
     ]
   end
