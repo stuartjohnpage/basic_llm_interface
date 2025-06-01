@@ -35,3 +35,5 @@ llm_interface-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Ignore dev.secret.exs
+config/dev.secret.exs

@@ -61,6 +61,13 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Configure language model timeout settings
+config :llm_interface,
+  chat_completions_url: "http://127.0.0.1:1234/v1/chat/completions",
+  timeout: 60_000,
+  recv_timeout: 240_000,
+  max_retries: 3
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
